@@ -11,5 +11,48 @@
     <h1>Welcome <%= user.username %></h1>
     <p> You email is <%= user.email %></p>
     <a href="/">Back</a>
+
+    <h2>Study logs</h2>
+
+    <div class="container">
+      <form action="/add-submit" method="POST">
+
+        <div class="subject-container">
+          <label for="subject">Subject:</label>
+          <br>
+          <input type="text" id="subject" placeholder="subject" name="subject" />
+        </div>
+        
+        <div class="time-container">
+          <label for="time">Time:</label>
+          <br>
+          <input type="text" id="time" placeholder="time" name="time" />
+        </div>
+
+        <div class="description-container">
+          <label for="description">Description:</label>
+          <br>
+          <textarea id="description" name="description" placeholder="description" style="height:100px"></textarea>
+        </div>
+
+        
+        <input type = "hidden" name = "username" value = "<%= user.username %>" />
+        <button class="submit-button" type="submit">Submit</button>    
+      </form>
+    </div>
+
+    <div class="calendar">
+      <ul class="submits">
+        <li class="submit">
+          <% if(user.hasOwnProperty('submits')){ %>
+          <%  user.submits.forEach(obj => { %>
+          <%  obj.forEach(element => { %>
+                <span><%= element %></span> |
+          <%  }) %>
+          <br/>
+          <% });} %>
+        </li>
+      </ul>
+    </div>
   </body>
 </html>

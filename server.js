@@ -52,7 +52,7 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
             })
 
             /* Check if array has the email the user is trying to register. */
-            if(emails.includes(req.body.email) || users.includes(req.body.username))
+            if(emails.includes(req.body.email) || usernames.includes(req.body.username))
             {
                 console.log("email or username already registered")
                 res.redirect('/err/auth')
@@ -66,7 +66,7 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
                     collection.insertOne(req.body)
                     .then(result => {
                         console.log(req.body)
-                        res.redirect('/err/auth')
+                        res.redirect('/')
                     })
                     .catch(error => console.error(error))
                   });
@@ -89,17 +89,23 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
                         if(result) {
                         // Passwords match
                          console.log("logged in")
-                         let userDomain = '/users/' + object._id
-                         res.redirect(userDomain)
+                         let userDomain = '/users/' //+ object._id
+                         //res.redirect(userDomain)
+                         res.end()
                         } else {
                             // Passwords don't match
-                            res.redirect('/err/auth')                         
+                            res.redirect('/err/auth')      
+                            return res.status(400).json({
+                                status: 'error',
+                                error: 'passwords dont match',
+                            });                   
                         } 
-                      }) 
+                    }) 
                 }
                 else {
                     console.log("login failed");
-                    res.redirect('/err/auth') 
+                    //res.redirect('/err/auth') 
+                    res.end()
                 }
             })
         })  .catch(error => console.error(error))
@@ -123,6 +129,7 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
                     {
                         console.log("id matches")
                         /* Render profile html. */
+                        console.log(object)
                         res.render('user-profile.ejs', {user: object})
                         // Stop foreach when user found in database
                         throw BreakException;
@@ -141,6 +148,28 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
     app.get('/err/auth', (err,res) => {
         res.render('auth-error.ejs', {err: "Login or registration failed"})
     })
+    
+    /*
+    app.post('/add-submit', (req,res) => {
+        var myquery = { username: req.body.username };
+
+        var postDate = new Date();
+        var dd = String(postDate.getDate()).padStart(2, '0');
+        var mm = String(postDate.getMonth() + 1).padStart(2, '0');
+        var yyyy = postDate.getFullYear();
+
+        postDate = mm + '/' + dd + '/' + yyyy;
+
+        var newvalues = { $push: {submits:  [subject= req.body.subject, time= req.body.time, description= req.body.description, date= postDate]   } };
+        console.log(myquery, newvalues)
+        db.collection("users").updateOne(myquery, newvalues, (err, response) => {
+            if (err) throw err;
+            console.log("1 document updated");
+            res.redirect('/users/5f831dbaaa9c3f461802e790')
+        });
+    })
+    */
+
     // 404 page
     app.use((req, res) => {
         res.status(404).send('404 not found');

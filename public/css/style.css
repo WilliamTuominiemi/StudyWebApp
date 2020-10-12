@@ -38,3 +38,38 @@ a{
 a:hover {
   color: #8e44ad;
 }
+
+/* User profile style */
+label{
+  font-family: 'Roboto', sans-serif;
+}
+
+input{
+    font-family: 'Roboto', sans-serif;
+}
+
+textarea{
+  font-family: 'Roboto', sans-serif;
+
+}
+
+.container{
+  margin-left: 25px;
+  width: 40%;
+}
+
+.subject-container{
+  margin: 10px;
+}
+
+.time-container{
+  margin: 10px;
+}
+
+.description-container{
+  margin: 10px;
+}
+
+.submit-button{
+  margin: 10px;
+}
