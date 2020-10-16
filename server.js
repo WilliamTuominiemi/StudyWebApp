@@ -77,37 +77,43 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
     // Login.
     app.post('/login', (req, res) => {
         console.log("logging in")
+        let itemsProcessed = 0;
         db.collection('users').find().toArray()            
-        .then(results => {
-            results.forEach(object => {
+        .then(results => {                                  
+            results.forEach(object => {    
                 /* Check if any authentication info in database match the authentication info input of user. */
                 /* .trim() function removes all whitespace. */
-                if(object.username.trim() === req.body.username.trim())
-                {
-                    /* Use bcrypt to compare the two */
-                    bcrypt.compare(req.body.password, object.password, (err, result) => {
-                        if(result) {
-                        // Passwords match
-                         console.log("logged in")
-                         let userDomain = '/users/' //+ object._id
-                         //res.redirect(userDomain)
-                         res.end()
-                        } else {
+                if(object.username.trim() === req.body.username.trim()) {
+                        /* Use bcrypt to compare the two */
+                        console.log(bcrypt.compareSync(req.body.password, object.password))
+                        if(bcrypt.compareSync(req.body.password, object.password)){
+                            // Passwords match
+                            itemsProcessed++
+                            console.log("Password match: ", itemsProcessed, results.length)
+                            res.redirect('/users/' + object._id)   
+                        } else{
                             // Passwords don't match
-                            res.redirect('/err/auth')      
-                            return res.status(400).json({
-                                status: 'error',
-                                error: 'passwords dont match',
-                            });                   
-                        } 
-                    }) 
-                }
-                else {
-                    console.log("login failed");
-                    //res.redirect('/err/auth') 
-                    res.end()
-                }
+                            itemsProcessed++
+                            console.log("Password don't match: ", itemsProcessed, results.length)
+                            if(itemsProcessed === results.length+1)
+                            {
+                                console.log("Passwords don't match")
+                                res.redirect('/err/auth')
+                            }
+                        }
+                }  
+                else{
+                    // User not found
+                    itemsProcessed++
+                    console.log("Password don't match: ", itemsProcessed, results.length)
+                    if(itemsProcessed === results.length)
+                    {
+                        console.log("User not found")
+                        res.redirect('/err/auth')
+                    }
+                }       
             })
+            
         })  .catch(error => console.error(error))
     })
 
@@ -122,14 +128,11 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
             try{
                 results.forEach(object => {
                     /* Use .toString() function to make JSON to a string so it can
-                    be used in if statement. */
-                    console.log(object._id.toString(), requestParam)
-                    
+                    be used in if statement. */                    
                     if(requestParam.includes(object._id.toString()))
                     {
                         console.log("id matches")
                         /* Render profile html. */
-                        console.log(object)
                         res.render('user-profile.ejs', {user: object})
                         // Stop foreach when user found in database
                         throw BreakException;
@@ -149,26 +152,49 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
         res.render('auth-error.ejs', {err: "Login or registration failed"})
     })
     
-    /*
+    
     app.post('/add-submit', (req,res) => {
-        var myquery = { username: req.body.username };
+        var query = { username: req.body.username };
+        db.collection("users").find(query).toArray((err, result) => {
+            if (err) throw err;
+            console.log(result);
+        });
 
-        var postDate = new Date();
-        var dd = String(postDate.getDate()).padStart(2, '0');
-        var mm = String(postDate.getMonth() + 1).padStart(2, '0');
-        var yyyy = postDate.getFullYear();
+
+        let postDate = new Date();
+        let dd = String(postDate.getDate()).padStart(2, '0');
+        let mm = String(postDate.getMonth() + 1).padStart(2, '0');
+        let yyyy = postDate.getFullYear();
 
         postDate = mm + '/' + dd + '/' + yyyy;
 
-        var newvalues = { $push: {submits:  [subject= req.body.subject, time= req.body.time, description= req.body.description, date= postDate]   } };
-        console.log(myquery, newvalues)
+        subject = req.body.subject
+
+        let pushValue = [
+            time= req.body.time,
+            description= req.body.description,
+            date= postDate 
+        ]
+            
+        console.log(pushValue)
+
+        let myquery = { username: req.body.username};
+        let newvalues = { 
+            $set: { 
+                submits: {
+                    [postDate]: {
+                        [subject] : pushValue
+                    }                         
+                } 
+            } 
+        }
         db.collection("users").updateOne(myquery, newvalues, (err, response) => {
             if (err) throw err;
             console.log("1 document updated");
-            res.redirect('/users/5f831dbaaa9c3f461802e790')
+            res.redirect('/users/'+req.body.id)
         });
     })
-    */
+    
 
     // 404 page
     app.use((req, res) => {

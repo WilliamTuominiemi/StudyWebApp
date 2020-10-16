@@ -2,7 +2,7 @@
 
 h1{
   font-family: 'Roboto', sans-serif;
-  text-decoration: overline;
+  text-decoration: underline;
   color: #8e44ad;
 }
 
@@ -53,9 +53,26 @@ textarea{
 
 }
 
+span {
+  font-family: 'Roboto', sans-serif;
+
+}
+
+.body{
+
+}
+
+.footer {
+  position: fixed;
+  bottom: 0px;
+  margin: 25px;
+  width: 100%;
+}
+
 .container{
-  margin-left: 25px;
-  width: 40%;
+  float: left;
+  margin-left: 20px;
+  width: 25%;
 }
 
 .subject-container{
