@@ -25,6 +25,8 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
     console.log('Connected to Database')
     const db = client.db('USER-AUTH')
     const collection = db.collection('users')
+    const datacollection = db.collection('user-data')
+
 
     /* Render main page at root. */
     app.get('/', (req, res) => {
@@ -60,13 +62,28 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
             else {
                 /* If not, add user to database. */
                 bcrypt.hash(req.body.password , 10, (err, hash) => {
-                    let password = req.body.password
                     req.body.password = hash
                     // Store hash in database
-                    collection.insertOne(req.body)
+
+                    let obj = {
+                        "username" : req.body.username,
+                        "email" : req.body.email,
+                        "password" : req.body.password,
+                    }
+
+                    let dataobj = {
+                        "username" : req.body.username,
+                    }
+
+                    collection.insertOne(obj)
                     .then(result => {
-                        console.log(req.body)
-                        res.redirect('/')
+                        console.log("users: ", obj)
+                        datacollection.insertOne(dataobj)
+                        .then(dresult => {
+                            console.log("users: ", dataobj)
+                            res.redirect('/')
+                        })
+                        .catch(error => console.error(error))
                     })
                     .catch(error => console.error(error))
                   });
@@ -119,32 +136,34 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 
     // User profile page.
     app.get('/users/:userId/', (req, res) => {
-        /* Use .toString() function to make JSON to a string so it can
-        be used in if statement. */
-        requestParam = JSON.stringify(req.params);
-        const BreakException = {};
+        requestParam = JSON.stringify(req.params)
+        const BreakException = {}
         db.collection('users').find().toArray()
         .then(results => {
-            try{
-                results.forEach(object => {
-                    /* Use .toString() function to make JSON to a string so it can
-                    be used in if statement. */                    
-                    if(requestParam.includes(object._id.toString()))
-                    {
-                        console.log("id matches")
-                        /* Render profile html. */
-                        res.render('user-profile.ejs', {user: object})
-                        // Stop foreach when user found in database
-                        throw BreakException;
-                    }
-                    else {
-                        console.log("id does not match")
-                    }
-                })
-            } catch (err) {
-                throw err;
-            }        
-        })  .catch(error => console.error(error))   
+            results.forEach(object => {                
+                if(requestParam.includes(object._id.toString()))
+                {
+                    console.log("id matches")
+
+                    console.log(object.username)
+
+                    const query = { username : object.username }
+
+                    db.collection("user-data").find(query).toArray()
+                    .then(items => {
+                      console.log(`Successfully found ${items.length} documents.`)
+                      console.log("user data: ", items[0])
+                      res.render('user-profile.ejs', {user: object, data: items[0]})
+                    })
+                    .catch(err => console.error(`Failed to find documents: ${err}`))
+                        
+                    
+                }
+                else {
+                    console.log("id does not match")
+                }
+            })
+        })  .catch(error => console.error("user error: ", error))   
     })
 
     // Register/Login error
@@ -154,12 +173,6 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
     
     
     app.post('/add-submit', (req,res) => {
-        var query = { username: req.body.username };
-        db.collection("users").find(query).toArray((err, result) => {
-            if (err) throw err;
-            console.log(result);
-        });
-
 
         let postDate = new Date();
         let dd = String(postDate.getDate()).padStart(2, '0');
@@ -170,29 +183,36 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 
         subject = req.body.subject
 
-        let pushValue = [
-            time= req.body.time,
-            description= req.body.description,
-            date= postDate 
-        ]
+        let pushValue = {
+            "time": req.body.time,
+            "description": req.body.description,
+            "date": postDate 
+        }
             
         console.log(pushValue)
 
-        let myquery = { username: req.body.username};
+        console.log(postDate)
+
         let newvalues = { 
-            $set: { 
-                submits: {
-                    [postDate]: {
-                        [subject] : pushValue
-                    }                         
-                } 
-            } 
+            $push: {
+                [postDate] : {
+                    [subject] : {
+                        "time": req.body.time,
+                        "description": req.body.description,
+                        "date": postDate 
+                    }
+                }
+            }                             
         }
-        db.collection("users").updateOne(myquery, newvalues, (err, response) => {
-            if (err) throw err;
+        var query = { username: req.body.username };
+
+        db.collection("user-data").updateOne(query, newvalues, (err, response) => {
+            if (err) {
+                throw err;
+            }
             console.log("1 document updated");
             res.redirect('/users/'+req.body.id)
-        });
+        }); 
     })
     
 

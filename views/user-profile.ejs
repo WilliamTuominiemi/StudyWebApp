@@ -45,12 +45,20 @@
       <div class="calendar">
         <ul class="submits">
           <li class="submit">
-            <%if(user.hasOwnProperty('submits')){ %>
-              <%for(date in user.submits) { %>
-                <p><%= date %></p>
-                <% for(let subject in user.submits[date]) { %>
-                  <p><%= subject %> | <%= user.submits[date][subject].time %> | <%= user.submits[date][subject].description %></p>  
-            <% }}} %>
+            <% for(let date in data) { %>
+              <% let parsedDate = Date.parse(date); %>
+              <% let totalTime = 0; %>
+              <% if(isNaN(parsedDate)) { %>             
+                  <p> <%= date %> is not date </p>
+              <% } else { %> 
+                <p> <%= date %> is a date </p>
+                <% for(subject in data[date]) { %>
+                  index: <%= data[date][subject] %>
+                  <p> subject:  <%= subject %> time: <%= data[date][subject].time %> description: <%= data[date][subject].description %> </p>
+                  <% totalTime += parseInt(subject.time) %>
+                 <% }//} %>
+                <p> <%= totalTime %></p>
+              <% } } %> 
 
           </li>
         </ul>
