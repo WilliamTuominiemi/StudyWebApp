@@ -27,7 +27,6 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
     const collection = db.collection('users')
     const datacollection = db.collection('user-data')
 
-
     /* Render main page at root. */
     app.get('/', (req, res) => {
         db.collection('users').find().toArray()
@@ -65,16 +64,19 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
                     req.body.password = hash
                     // Store hash in database
 
+                    // Object that goes to the users collection.
                     let obj = {
                         "username" : req.body.username,
                         "email" : req.body.email,
                         "password" : req.body.password,
                     }
 
+                    // Object that goes to the users data collection, later user data will be added here.
                     let dataobj = {
                         "username" : req.body.username,
                     }
 
+                    // Insert the object to the database.
                     collection.insertOne(obj)
                     .then(result => {
                         console.log("users: ", obj)
@@ -136,11 +138,13 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 
     // User profile page.
     app.get('/users/:userId/', (req, res) => {
+        // The domain of the user page is the id of the users object.
         requestParam = JSON.stringify(req.params)
         const BreakException = {}
         db.collection('users').find().toArray()
         .then(results => {
-            results.forEach(object => {                
+            results.forEach(object => {      
+                // The users id in the domain is used to get the user data.        
                 if(requestParam.includes(object._id.toString()))
                 {
                     console.log("id matches")
@@ -149,6 +153,7 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 
                     const query = { username : object.username }
 
+                    // Get the users data with the users username.
                     db.collection("user-data").find(query).toArray()
                     .then(items => {
                       console.log(`Successfully found ${items.length} documents.`)
@@ -171,9 +176,9 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
         res.render('auth-error.ejs', {err: "Login or registration failed"})
     })
     
-    
+    // Add a object to the users data collection
     app.post('/add-submit', (req,res) => {
-
+        // Get date
         let postDate = new Date();
         let dd = String(postDate.getDate()).padStart(2, '0');
         let mm = String(postDate.getMonth() + 1).padStart(2, '0');
@@ -185,6 +190,7 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 
         console.log(postDate)
 
+        // Push to data to an array which is called the date of the day it is pushed.
         let newvalues = { 
             $push: {
                 [postDate] : {
