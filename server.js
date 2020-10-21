@@ -183,20 +183,13 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 
         subject = req.body.subject
 
-        let pushValue = {
-            "time": req.body.time,
-            "description": req.body.description,
-            "date": postDate 
-        }
-            
-        console.log(pushValue)
-
         console.log(postDate)
 
         let newvalues = { 
             $push: {
                 [postDate] : {
                     [subject] : {
+                        "name": req.body.subject,
                         "time": req.body.time,
                         "description": req.body.description,
                         "date": postDate 

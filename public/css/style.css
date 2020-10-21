@@ -25,6 +25,21 @@ p{
   margin-bottom: 30px;
 }
 
+
+.submit-button{
+  font-family: 'Roboto', sans-serif;
+  margin: 10px;
+  background-color: #9b59b6;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+
+}
+
+.submit-button:hover {
+  color: #8e44ad;
+}
+
 a{
   font-family: 'Roboto', sans-serif;
   background-color: #9b59b6;
@@ -58,6 +73,19 @@ span {
 
 }
 
+.date-text {
+  font-family: 'Roboto', sans-serif;
+  color: #8e44ad;
+}
+
+.total-time {
+  font-family: 'Roboto', sans-serif;
+  color: #8e44ad;
+}
+
+.submit-content {
+}
+
 .body{
 
 }
@@ -84,9 +112,5 @@ span {
 }
 
 .description-container{
-  margin: 10px;
-}
-
-.submit-button{
   margin: 10px;
 }

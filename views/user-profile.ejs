@@ -19,48 +19,48 @@
           <div class="subject-container">
             <label for="subject">Subject:</label>
             <br>
-            <input type="text" id="subject" placeholder="Math" name="subject" />
+            <input type="text" id="subject" placeholder="Math" name="subject" required/>
           </div>
           
           <div class="time-container">
             <label for="time">Time (minutes):</label>
             <br>
-            <input type="number" id="time" min="0" placeholder="15" name="time" />
+            <input type="number" id="time" min="0" placeholder="15" name="time" required/>
           </div>
 
           <div class="description-container">
             <label for="description">Description:</label>
             <br>
-            <textarea id="description" name="description" placeholder="Exercises" style="height:100px"></textarea>
+            <textarea id="description" name="description" placeholder="Exercises" style="height:100px" required></textarea>
           </div>
 
           
           <input type = "hidden" name = "username" value = "<%= user.username %>" />
           <input type = "hidden" name = "id" value = "<%= user._id %>" />
 
-          <button class="submit-button" type="submit">Submit</button>    
+          <button class="submit-button" type="submit">Submit</button>   
         </form>
       </div>
 
       <div class="calendar">
-        <ul class="submits">
-          <li class="submit">
-            <% for(let date in data) { %>
+        <ul class="submits">       
+            <% for(date in data) { %>
               <% let parsedDate = Date.parse(date); %>
               <% let totalTime = 0; %>
               <% if(isNaN(parsedDate)) { %>             
-                  <p> <%= date %> is not date </p>
               <% } else { %> 
-                <p> <%= date %> is a date </p>
+                <h3 class="date-text"> <%= date %> </h3>
                 <% for(subject in data[date]) { %>
-                  index: <%= data[date][subject] %>
-                  <p> subject:  <%= subject %> time: <%= data[date][subject].time %> description: <%= data[date][subject].description %> </p>
-                  <% totalTime += parseInt(subject.time) %>
-                 <% }//} %>
-                <p> <%= totalTime %></p>
-              <% } } %> 
-
-          </li>
+                  <% for(element in data[date][subject]) { %>
+                  <li class="submit">
+                  <div class="submit-content">
+                    <p> <%= data[date][subject][element].name %> | <%= data[date][subject][element].description %> | <%= data[date][subject][element].time %> min </p>
+                  </div>
+                  </li>
+                  <% totalTime += parseInt(data[date][subject][element].time) %>
+                 <% } } %>
+                <p class="total-time"> Total time: <%= totalTime %> minutes</p>
+              <% } } %>         
         </ul>
       </div>
     </div>
